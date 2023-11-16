@@ -48,7 +48,7 @@ async def update_link(text, chat_id):
 
 @router.message(F.text.startswith("/start"))
 async def start(message: Message):
-    await message.answer("Ну разраб - дебил, не может сделать генерацию текста здесь. И ваще иди на***")
+    await message.answer("Привет, бот сохраняем файлы, фото, ссылки в текущем чате. Для вывод сохраненных данных используйте команды /document\n/photo\n/link")
 
 
 @router.message(F.text.startswith("/select"))
