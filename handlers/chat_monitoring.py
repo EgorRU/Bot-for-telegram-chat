@@ -1,12 +1,12 @@
 from aiogram import Router, F
 from aiogram.types import Message
 from aiogram.filters import BaseFilter
-import sqlite3
 from asyncio import sleep
+import sqlite3
 from config import ADMIN_API
 
 
-router = Router()
+chat_monitoring = Router()
 
 class FilterLink(BaseFilter):
     async def __call__(self, message: Message):
@@ -46,12 +46,12 @@ async def update_link(text, chat_id):
     base.close()
     
 
-@router.message(F.text.startswith("/start"))
+@chat_monitoring.message(F.text.startswith("/start"))
 async def start(message: Message):
     await message.answer("Привет, бот сохраняем файлы, фото, ссылки в текущем чате. Для вывод сохраненных данных используйте команды\n/document\n/photo\n/link")
 
 
-@router.message(F.text.startswith("/select"))
+@chat_monitoring.message(F.text.startswith("/select"))
 async def select(message: Message):
     text = message.text.split()
     if len(text)==1:
@@ -69,7 +69,7 @@ async def select(message: Message):
         base.close()
         
 
-@router.message(F.text.startswith("/document"))
+@chat_monitoring.message(F.text.startswith("/document"))
 async def alldocument(message: Message):
     base, cur = await connection()
     data = cur.execute(f"SELECT document_id FROM data where type=? and chat_id=?", ("document", message.chat.id)).fetchall()
@@ -85,7 +85,7 @@ async def alldocument(message: Message):
     base.close()
     
 
-@router.message(F.text.startswith("/photo"))
+@chat_monitoring.message(F.text.startswith("/photo"))
 async def allphoto(message: Message):
     base, cur = await connection()
     data = cur.execute(f"SELECT document_id FROM data where type=? and chat_id=?", ("photo", message.chat.id)).fetchall()
@@ -101,7 +101,7 @@ async def allphoto(message: Message):
     base.close()
   
 
-@router.message(F.text.startswith("/link"))
+@chat_monitoring.message(F.text.startswith("/link"))
 async def alllink(message: Message):
     base, cur = await connection()
     data = cur.execute(f"SELECT text FROM data where type=? and chat_id=?", ("link", message.chat.id)).fetchall()
@@ -117,7 +117,7 @@ async def alllink(message: Message):
     base.close()
     
 
-@router.message(F.text.startswith('/alldocument'))
+@chat_monitoring.message(F.text.startswith('/alldocument'))
 async def document(message: Message):
     if message.from_user.id == ADMIN_API:
         base, cur = await connection()
@@ -132,7 +132,7 @@ async def document(message: Message):
         await message.answer("Недостаточно прав")
 
 
-@router.message(F.text.startswith('/allphoto'))
+@chat_monitoring.message(F.text.startswith('/allphoto'))
 async def photo(message: Message):
     if message.from_user.id == ADMIN_API:
         base, cur = await connection()
@@ -147,7 +147,7 @@ async def photo(message: Message):
         await message.answer("Недостаточно прав")
         
 
-@router.message(F.text.startswith('/alllink'))
+@chat_monitoring.message(F.text.startswith('/alllink'))
 async def link(message: Message):
     if message.from_user.id == ADMIN_API:
         base, cur = await connection()
@@ -162,16 +162,16 @@ async def link(message: Message):
         await message.answer("Недостаточно прав")
         
 
-@router.message(F.document)
+@chat_monitoring.message(F.document)
 async def get_document(message: Message):
     await update_document(message.document.file_id, message.document.file_name, message.chat.id)
     
 
-@router.message(F.photo)
+@chat_monitoring.message(F.photo)
 async def get_photo(message: Message):
     await update_photo(message.photo[-1].file_id, message.chat.id)
     
 
-@router.message(FilterLink())
+@chat_monitoring.message(FilterLink())
 async def other(message: Message):
     await update_link(message.text, message.chat.id)
