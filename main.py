@@ -11,8 +11,8 @@ dp = Dispatcher(storage=MemoryStorage())
 
 
 async def main():
-    dp.include_router(chat_monitoring)
     dp.include_router(schedule)
+    dp.include_router(chat_monitoring)
     await dp.start_polling(bot)
 
 

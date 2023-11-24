@@ -2,53 +2,24 @@ from aiogram import Router, F
 from aiogram.types import Message
 from aiogram.filters import BaseFilter
 from asyncio import sleep
-import sqlite3
 from config import ADMIN_API
+from db import connection, update_document, update_photo, update_link
 
 
 chat_monitoring = Router()
 
 class FilterLink(BaseFilter):
+    '''Фильтрация ссылок
+    
+       Возвращает True, если в сообщение встречено 'http'
+    '''
     async def __call__(self, message: Message):
         return "http" in message.text
-
-
-async def connection():
-    base = sqlite3.connect("database.db")
-    cur = base.cursor()
-    base.execute("CREATE TABLE IF NOT EXISTS data(document_id PRIMARY KEY, name TEXT, type TEXT, chat_id TEXT, text TEXT)")
-    base.commit()
-    return base, cur
-
-
-async def update_document(document_id, name, chat_id):
-    base, cur = await connection()
-    data = cur.execute(f"SELECT document_id FROM data WHERE name=? and chat_id=?",(name, chat_id)).fetchone()
-    if data == None:
-        cur.execute("INSERT INTO data(document_id, name, type, chat_id) values(?,?,?,?)",(document_id, name, "document", chat_id))
-    else:
-        cur.execute("UPDATE data set document_id=? where name=? and chat_id=?", (document_id, name, chat_id))
-    base.commit()
-    base.close()
-
-
-async def update_photo(document_id, chat_id):
-    base, cur = await connection()
-    cur.execute("INSERT INTO data(document_id, type, chat_id) values(?,?,?)",(document_id, "photo", chat_id))
-    base.commit()
-    base.close()
-
-
-async def update_link(text, chat_id):
-    base, cur = await connection()
-    cur.execute("INSERT INTO data(type, chat_id, text) values(?,?,?)",("link", chat_id, text))
-    base.commit()
-    base.close()
     
 
 @chat_monitoring.message(F.text.startswith("/start"))
 async def start(message: Message):
-    await message.answer("Привет, бот сохраняем файлы, фото, ссылки в текущем чате. Для вывод сохраненных данных используйте команды\n/document\n/photo\n/link")
+    await message.answer("Привет, бот сохраняем файлы, фото, ссылки в текущем чате. Для вывод сохраненных данных используйте команды\n/document\n/photo\n/link\n\n/schedule - вывести расписание любой группы ВятГУ")
 
 
 @chat_monitoring.message(F.text.startswith("/select"))
