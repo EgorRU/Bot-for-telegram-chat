@@ -8,6 +8,7 @@ from bs4 import BeautifulSoup
 from typing import Union
 from asyncio import sleep
 import requests
+import aspose.pdf as ap
 from db import connection
 
 
@@ -69,7 +70,17 @@ async def get_schedule(name_group) -> Union[str, None]:
             url += html[index]
             index += 1
     except:
-        return 
+        return
+    # response = requests.get(url)
+    # reverse_url = url[::-1]
+    # name_file = ""
+    # index = 0
+    # while reverse_url[index]!='/':
+    #     name_file += reverse_url[index]
+    #     index += 1
+    # name_file = name_file[::-1]
+    # with open(name_file, 'wb') as file: 
+    #     file.write(response.content)
     return url
 
 
@@ -93,11 +104,12 @@ async def cancel_state(callback: CallbackQuery, state: FSMContext):
 @schedule.message(ScheduleGroups.name_group)
 async def find_name_group(message: Message, state: FSMContext):
     #если написали команду, то отменяем машину состояний и выполняем действие по команде
-    list_command = ['/start', '/select', '/document', '/photo', '/link']
+    list_command = ['/start', '/select', '/document', '/photo', '/link',
+                    '/start@DataFullBot', '/select@DataFullBot', '/document@DataFullBot', '/photo@DataFullBot', '/link@DataFullBot']
     if message.text in list_command or message.text[:7] == '/select':
         await state.clear()
         base, cur = await connection()
-        if message.text == '/start':
+        if message.text[:6] == '/start':
             await message.answer("Привет, бот сохраняем файлы, фото, ссылки в текущем чате. Для вывод сохраненных данных используйте команды\n/document\n/photo\n/link\n\n/schedule - вывести расписание любой группы ВятГУ")
         elif message.text[:7] == '/select':
             text = message.text.split()
@@ -112,7 +124,7 @@ async def find_name_group(message: Message, state: FSMContext):
                     if pattern in name:
                         await message.answer_document(document=f"{document_id}")
                         await sleep(0.2)
-        elif message.text == '/document':
+        elif message.text[:9] == '/document':
             data = cur.execute(f"SELECT document_id FROM data where type=? and chat_id=?", ("document", message.chat.id)).fetchall()
             data = data[::-1]
             count = 0 
@@ -123,7 +135,7 @@ async def find_name_group(message: Message, state: FSMContext):
                 count += 1
                 if count >50:
                     break
-        elif message.text == '/photo':
+        elif message.text[:6] == '/photo':
             data = cur.execute(f"SELECT document_id FROM data where type=? and chat_id=?", ("photo", message.chat.id)).fetchall()
             data = data[::-1]
             count = 0
@@ -134,7 +146,7 @@ async def find_name_group(message: Message, state: FSMContext):
                 count += 1
                 if count >50:
                     break
-        elif message.text == '/link':
+        elif message.text[:5] == '/link':
             data = cur.execute(f"SELECT text FROM data where type=? and chat_id=?", ("link", message.chat.id)).fetchall()
             data = data[::-1]
             count = 0
