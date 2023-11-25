@@ -1,14 +1,12 @@
 from aiogram import Router, F
 from aiogram.types import Message, CallbackQuery, InlineKeyboardMarkup, InlineKeyboardButton
 from aiogram.fsm.state import State, StatesGroup
-from aiogram.filters import Command, StateFilter
+from aiogram.filters import Command, StateFilter, BaseFilter
 from aiogram.fsm.context import FSMContext
-from aiogram.filters import BaseFilter
 from bs4 import BeautifulSoup
 from typing import Union
 from asyncio import sleep
 import requests
-import aspose.pdf as ap
 from db import connection
 
 
@@ -71,16 +69,6 @@ async def get_schedule(name_group) -> Union[str, None]:
             index += 1
     except:
         return
-    # response = requests.get(url)
-    # reverse_url = url[::-1]
-    # name_file = ""
-    # index = 0
-    # while reverse_url[index]!='/':
-    #     name_file += reverse_url[index]
-    #     index += 1
-    # name_file = name_file[::-1]
-    # with open(name_file, 'wb') as file: 
-    #     file.write(response.content)
     return url
 
 

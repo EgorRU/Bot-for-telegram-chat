@@ -1,6 +1,5 @@
 import sqlite3
 
-
 async def connection():
     '''Подключение в базе данных SQlite
     '''

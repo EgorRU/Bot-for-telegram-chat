@@ -8,6 +8,7 @@ from db import connection, update_document, update_photo, update_link
 
 chat_monitoring = Router()
 
+
 class FilterLink(BaseFilter):
     '''Фильтрация ссылок
     
